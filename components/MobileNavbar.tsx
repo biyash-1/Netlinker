@@ -1,4 +1,4 @@
-
+"use client";
 import {
   BellIcon,
   HomeIcon,
@@ -11,16 +11,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
-import { useAuth, SignInButton, SignOutButton } from "@clerk/nextjs";
+import {useUser, useAuth, SignInButton, SignOutButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { currentUser } from "@clerk/nextjs/server";
 
-async function MobileNavbar() {
+
+ function MobileNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { isSignedIn } = useAuth();
   const { theme, setTheme } = useTheme();
- const user = await currentUser();
+ const {user} = useUser();
 
   return (
     <div className="flex md:hidden items-center space-x-2">
