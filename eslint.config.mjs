@@ -16,6 +16,9 @@ export default [
       "@typescript-eslint/no-unused-vars":         "off",
       "@typescript-eslint/no-empty-object-type":   "off",
       "@typescript-eslint/no-unsafe-function-type":"off",
+
+      "@typescript-eslint/no-unused-expressions": "off",
+      "no-unused-expressions": "off",
     },
   }),
 
