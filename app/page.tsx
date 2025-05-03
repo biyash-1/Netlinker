@@ -8,11 +8,7 @@ import { getDbUserId } from "./actions/user.action";
 
 export default async function Home() {
   const user = await currentUser();
-
- 
   const dbUserId = await getDbUserId();      
-
-  
   const posts = await getPosts();            
 
   return (
