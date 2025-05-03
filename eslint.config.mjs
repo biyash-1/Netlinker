@@ -20,6 +20,7 @@ export default [
       "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-unnecessary-type-constraint": "off",
       "@typescript-eslint/no-unused-expressions": "off",
+      "@typescript-eslint/no-wrapper-object-types": "off",
       "no-unused-expressions": "off",
     },
   }),
