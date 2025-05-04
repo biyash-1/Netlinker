@@ -46,27 +46,40 @@ export async function syncUser() {
 
 }
 
-export async function getUserByClerkId(clerkId:string){
- 
-return prisma.user.findUnique({
-  where:{
-    clerkId,
-  },
-  include:
-  {
-    _count:{
-      select:{
-        followers:true,
-        following:true,
-        posts:true
+export async function getUserByClerkId(clerkId: string) {
+  return prisma.user.findUnique({
+    where: { clerkId },
+    include: {
+      following: {
+        include: {
+          following: {  
+            select: {
+              id: true,
+              username: true,
+              name: true,
+              image: true
+            }
+          }
+        }
+      },
+      followers:{
+        include:{
+          follower:{
+            select:{
+              id:true,
+              username:true,
+              name:true,
+              image:true,
+            }
+          }
+        }
+      },
+      _count: {
+        select: { followers: true, following: true }
       }
     }
-  }
-
-})
- 
+  });
 }
-
 export async function getDbUserId() {
   const { userId: clerkId } = await auth();
   if (!clerkId) return null;
@@ -119,6 +132,19 @@ export async function getRandomUsers() {
     console.log("Error fetching random users", error);
     return [];
   }
+}
+
+// Add to your server actions
+export async function getCurrentUserFollowingIds() {
+  const userId = await getDbUserId();
+  if (!userId) return [];
+
+  const following = await prisma.follows.findMany({
+    where: { followerId: userId },
+    select: { followingId: true },
+  });
+
+  return following.map(f => f.followingId);
 }
 
 export async function toggleFollow(targetUserId: string) {
