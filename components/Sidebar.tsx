@@ -10,7 +10,7 @@ async function Sidebar() {
     const user = await getUserByClerkId(authUser.id)
     if(!user) return null
 
- 
+
    
 
     return <SidebarClient user={user} />

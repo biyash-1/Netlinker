@@ -12,7 +12,7 @@ import { toggleFollow, getCurrentUserFollowingIds } from "../app/actions/user.ac
 interface UserRelation {
   id: string;
   username: string;
-  name: string;
+  name: string | null;
   image: string | null;
 }
 
@@ -21,7 +21,7 @@ interface SidebarClientProps {
     id: string;
     username: string;
     image: string | null;
-    name: string;
+    name: string | null;
     bio: string;
     location: string;
     website: string;
@@ -120,7 +120,7 @@ export default function SidebarClient({ user }: SidebarClientProps) {
             <Avatar className="w-20 h-20 border-4">
               <AvatarImage src={user.image || "/avatar.png"} />
             </Avatar>
-            <h3 className="mt-4 font-semibold">{user.name}</h3>
+            <h3 className="mt-4 font-semibold">{user.name || "anonomys"}</h3>
             <p className="text-sm text-muted-foreground">@{user.username}</p>
           </Link>
           {user.bio && <p className="mt-3 text-sm text-muted-foreground">{user.bio}</p>}
