@@ -22,7 +22,7 @@ interface SidebarClientProps {
     username: string;
     image: string | null;
     name: string | null;
-    bio: string;
+    bio: string |null;
     location: string;
     website: string;
     _count: { following: number; followers: number };
