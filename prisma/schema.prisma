@@ -35,8 +35,8 @@ model User {
   notificationsCreated  Notification[] @relation("notificationCreator")
 
   // Chat relations (added missing reverse relations)
-  participants  ConversationParticipant[]
-  sentMessages  Message[]
+ 
+ 
 }
 
 model Post {
