@@ -113,9 +113,9 @@ export default function SidebarClient({ user }: SidebarClientProps) {
   };
 
   return (
-    <div className="relative top-20">
+    <div className="relative top-10">
       <Card>
-        <CardContent className="pt-6 text-center">
+        <CardContent className="pt-0 text-center">
           <Link href={`/profile/${user.username}`} className="flex flex-col items-center">
             <Avatar className="w-20 h-20 border-4">
               <AvatarImage src={user.image || "/avatar.png"} />
@@ -135,7 +135,7 @@ export default function SidebarClient({ user }: SidebarClientProps) {
               <Separator orientation="vertical" />
               <div onClick={() => setShowModal("followers")} className="cursor-pointer">
                 <p className="font-medium">{user._count.followers}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
+                <p className="text-xs  text-muted-foreground">Followers</p>
               </div>
             </div>
             <Separator className="mt-4" />

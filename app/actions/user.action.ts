@@ -134,6 +134,32 @@ export async function getRandomUsers() {
   }
 }
 
+
+export async function getChatContact() {
+  try {
+  
+    const userId = await getDbUserId();
+    if (!userId) return [];
+
+    const chatUsers = await prisma.user.findMany({
+      where: {
+      
+        id: { not: userId },
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        image: true
+      }
+    });
+
+    return chatUsers;
+  } catch (error) {
+    console.error("Error fetching chat contacts", error);
+    return [];
+  }
+}
 // Add to your server actions
 export async function getCurrentUserFollowingIds() {
   const userId = await getDbUserId();
