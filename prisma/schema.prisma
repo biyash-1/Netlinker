@@ -34,7 +34,7 @@ model User {
   notifications         Notification[] @relation("userNotifications")
   notificationsCreated  Notification[] @relation("notificationCreator")
 
-  // Chat relations (added missing reverse relations)
+
  
  
 }
