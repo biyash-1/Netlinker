@@ -21,6 +21,11 @@ export async function syncUser() {
     });
 
     if (existingUser) {
+
+
+
+
+      
       return existingUser;
     }
 
