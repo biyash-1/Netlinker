@@ -26,10 +26,9 @@ function ImageUpload({ endpoint, onChange, value }: ImageUploadProps) {
   }
   return (
     <UploadDropzone
-    className="w-32 min-h-[80px] flex flex-col justify-between items-center rounded-md border-dashed mx-auto"
-      endpoint="imageUploader"
+      endpoint={endpoint}
       onClientUploadComplete={(res) => {
-        onChange(res?.[0].ufsUrl);
+        onChange(res?.[0].url);
       }}
       onUploadError={(error: Error) => {
         console.log(error);
