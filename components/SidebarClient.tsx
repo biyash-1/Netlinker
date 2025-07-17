@@ -141,7 +141,7 @@ export default function SidebarClient({ user }: SidebarClientProps) {
             <Separator className="mt-4" />
           </div>
 
-          <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="space-y-3 text-sm text-muted-foreground">
             <div className="flex items-center">
               <MapPinIcon className="w-4 h-4 mr-1" />
               {user.location || "No location"}
