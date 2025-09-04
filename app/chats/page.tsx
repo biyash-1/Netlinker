@@ -1,30 +1,64 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import ChatSidebar from "@/components/ChatSidebar";
 import ChatHeader from "@/components/ChatHeader";
 import { ChatUser } from "@/app/types/chat";
 import ChatInput from "@/components/ChatInput";
 import ChatContainer from "@/components/ChatContainer";
-import { useAuth } from "@clerk/nextjs";
+
+interface DbUser {
+  id: string;      // Prisma user.id
+  clerkId: string; // Clerk userId
+  name: string;
+}
 
 const Page = () => {
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
-  const { userId } = useAuth();
+  const [currentUser, setCurrentUser] = useState<DbUser | null>(null);
+
+  // Fetch the current Prisma user (not Clerk user)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user/me");
+        const data = await res.json();
+        if (res.ok) {
+          setCurrentUser(data);
+        } else {
+          console.error("Failed to load current user:", data);
+        }
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  if (!currentUser) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-slate-900 text-white">
+        Loading chat…
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-start h-screen bg-slate-900 pt-12">
-      <div className="border rounded-lg h-[600px] w-[800px] flex justify-between items-center mb-8">
+      <div className="border rounded-lg h-[600px] w-[800px] flex justify-between items-center mb-8 ">
         {/* Sidebar */}
-        <div className="sidebar flex flex-col w-[25%] border border-r h-full">
-          <ChatSidebar selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
+        <div className="sidebar flex flex-col w-[25%] border-r h-full">
+          <ChatSidebar
+            selectedUser={selectedUser}
+            setSelectedUser={setSelectedUser}
+          />
         </div>
 
         {/* Chat area */}
         <div className="chatcontent flex flex-col w-[75%] h-full">
           {/* Header */}
-          <div className="h-12 w-full border-b flex items-center bg-slate-700">
+          <div className="h-12 w-full border-b flex items-center bg-slate-700 text-white px-3">
             <ChatHeader selectedUser={selectedUser} />
           </div>
 
@@ -32,9 +66,9 @@ const Page = () => {
           <div className="flex-1 overflow-y-auto w-full">
             <ChatContainer
               selectedUser={selectedUser}
-              currentUserId={userId!}
-              messages={messages}          // ✅
-              setMessages={setMessages}    // ✅
+              currentUserId={currentUser.id}   // ✅ Prisma ID
+              messages={messages}
+              setMessages={setMessages}
             />
           </div>
 
@@ -42,7 +76,8 @@ const Page = () => {
           <div className="border-t w-full">
             {selectedUser && (
               <ChatInput
-                receiverId={selectedUser.id}
+                currentUserId={currentUser.id}   // ✅ Prisma ID
+                receiverId={selectedUser.id}     // ✅ Prisma ID
                 onMessageSent={(newMessage) =>
                   setMessages((prev) => [...prev, newMessage])
                 }
