@@ -14,10 +14,15 @@ type ChatSidebarProps = {
 const ChatSidebar = ({ selectedUser, setSelectedUser }: ChatSidebarProps) => {
   const [users, setUsers] = useState<ChatUser[]>([]);
 
+  const[loading,setLoading] = useState(true);
+
+
+
   useEffect(() => {
     async function fetchUser() {
       const users = await getChatContact();
       setUsers(users);
+      setLoading(false);
     }
     fetchUser();
   }, []);
@@ -26,7 +31,12 @@ const ChatSidebar = ({ selectedUser, setSelectedUser }: ChatSidebarProps) => {
 <div className="flex flex-col h-full bg-slate-800">
       <h1 className="text-center text-xl font-bold border-b py-2">Contacts</h1>
       <div className="w-full flex-1 overflow-y-auto py-2">
-        {users.map((user, index) => (
+        {
+          loading? (
+            <p className='text-center'>users loading.....</p>
+          ):
+        
+        (users.map((user, index) => (
           <div
             className={`w-full flex items-center gap-3 mb-4 ${
               selectedUser?.id === user.id ? "bg-slate-600" : "hover:bg-slate-100"
@@ -41,7 +51,7 @@ const ChatSidebar = ({ selectedUser, setSelectedUser }: ChatSidebarProps) => {
             />
             <p className="font-medium">{user.name}</p>
           </div>
-        ))}
+        )))}
       </div>
     </div>
   );

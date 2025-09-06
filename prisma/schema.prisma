@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-   output   = "node_modules/.prisma/client"
+   
 }
 
 datasource db {
@@ -33,9 +33,12 @@ model User {
   // Notification relations
   notifications         Notification[] @relation("userNotifications")
   notificationsCreated  Notification[] @relation("notificationCreator")
+  
+  // Chat relations
+   sentChats     Chat[] @relation("ChatSender")   // all chats where this user is the sender
+  receivedChats Chat[] @relation("ChatReceiver") // all chats where this user is the receiver
 
-
- 
+  messagesSent Message[] @relation("MessageSender")
  
 }
 
@@ -101,7 +104,6 @@ model Notification {
   postId     String?
   commentId  String?
   createdAt  DateTime         @default(now())
-
   user     User    @relation("userNotifications", fields: [userId], references: [id], onDelete: Cascade)
   creator  User    @relation("notificationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   post     Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -116,3 +118,30 @@ enum NotificationType {
   FOLLOW
 }
 
+
+model Chat {
+  id          String    @id @default(cuid())
+  senderId    String
+  receiverId  String
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  sender    User @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ChatReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@unique([senderId, receiverId]) // prevent duplicate chats between same sender & receiver
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  senderId  String
+  content   String
+  image     String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+}

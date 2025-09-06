@@ -1,55 +1,61 @@
-import { BellIcon, HomeIcon, UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import { ModeToggle } from "./ModeToggle";
-import { currentUser } from "@clerk/nextjs/server";
+"use client";
 
-async function DesktopNavbar() {
-  const user = await currentUser();
+import { BellIcon, HomeIcon, UserIcon } from "lucide-react";
+import Link from "next/link";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { ModeToggle } from "./ModeToggle";
+
+function DesktopNavbar() {
+  const { user, isSignedIn } = useUser();
+
+  // Shared Tailwind class for nav items
+  const navItemClass =
+    "flex items-center gap-2 px-3 py-2 rounded-md hover:bg-slate-700 transition-colors";
 
   return (
     <div className="hidden md:flex items-center space-x-4">
-      <Button variant="ghost" className="flex items-center gap-2" asChild>
-        <Link href="/">
-          <HomeIcon className="w-4 h-4" />
-          <span className="hidden lg:inline">Home</span>
-        </Link>
-      </Button>
+      {/* Home */}
+      <Link href="/" className={navItemClass}>
+        <HomeIcon className="w-4 h-4" />
+        <span className="hidden lg:inline">Home</span>
+      </Link>
 
-      {user ? (
+      {isSignedIn && user ? (
         <>
+          {/* Chat */}
+          <Link href="/chats" className={navItemClass}>
+            <BellIcon className="w-4 h-4" />
+            <span className="hidden lg:inline">Chat</span>
+          </Link>
 
-          <Button variant="ghost" className="flex items-center gap-2" asChild>
-            <Link href="/chats">
-              <BellIcon className="w-4 h-4" />
-              <span className="hidden lg:inline">Chat</span>
-            </Link>
-          </Button>
-          <Button variant="ghost" className="flex items-center gap-2" asChild>
-            <Link href="/notifications">
-              <BellIcon className="w-4 h-4" />
-              <span className="hidden lg:inline">Notifications</span>
-            </Link>
-          </Button>
-       
-          <Button variant="ghost" className="flex items-center gap-2" asChild>
-            <Link
-              href={`/profile/${
-                user.username ?? user.emailAddresses[0].emailAddress.split("@")[0]
-              }`}
-            >
-              <UserIcon className="w-4 h-4" />
-              <span className="hidden lg:inline">Profile</span>
-            </Link>
-          </Button>
+          {/* Notifications */}
+          <Link href="/notifications" className={navItemClass}>
+            <BellIcon className="w-4 h-4" />
+            <span className="hidden lg:inline">Notifications</span>
+          </Link>
 
+          {/* Profile */}
+          <Link
+            href={`/profile/${
+              user.username ?? user.primaryEmailAddress?.emailAddress.split("@")[0]
+            }`}
+            className={navItemClass}
+          >
+            <UserIcon className="w-4 h-4" />
+            <span className="hidden lg:inline">Profile</span>
+          </Link>
+
+          {/* Mode toggle */}
           <ModeToggle />
+
+          {/* Clerk UserButton */}
           <UserButton />
         </>
       ) : (
         <SignInButton mode="modal">
-          <Button variant="default">Sign In</Button>
+          <button className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+            Sign In
+          </button>
         </SignInButton>
       )}
     </div>

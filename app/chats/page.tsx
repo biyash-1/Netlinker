@@ -34,59 +34,75 @@ const Page = () => {
       }
     };
     fetchUser();
+
+    
+    
   }, []);
 
   if (!currentUser) {
     return (
       <div className="flex justify-center items-center h-screen bg-slate-900 text-white">
-        Loading chat…
+        <div className="animate-pulse">Loading chat…</div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center items-start h-screen bg-slate-900 pt-12">
-      <div className="border rounded-lg h-[600px] w-[800px] flex justify-between items-center mb-8 ">
+    
+
+    <div className=" flex justify-center items-center min-h-screen bg-slate-900 p-4">
+      <div className="flex  rounded-xl flex-1  overflow-hidden shadow-xl w-full max-w-5xl h-[80vh]">
         {/* Sidebar */}
-        <div className="sidebar flex flex-col w-[25%] border-r h-full">
+        <div className="w-1/4 min-w-[220px] bg-slate-800 border-r border-slate-700">
           <ChatSidebar
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
           />
         </div>
 
-        {/* Chat area */}
-        <div className="chatcontent flex flex-col w-[75%] h-full">
-          {/* Header */}
-          <div className="h-12 w-full border-b flex items-center bg-slate-700 text-white px-3">
-            <ChatHeader selectedUser={selectedUser} />
-          </div>
+        {/* Main Chat Area */}
+        <div className="flex flex-col w-3/4 bg-slate-800">
+          {selectedUser ? (
+            <>
+              {/* Header */}
+              <div className="h-16 border-b border-slate-700 flex items-center px-4 bg-slate-800">
+                <ChatHeader selectedUser={selectedUser} />
+              </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto w-full">
-            <ChatContainer
-              selectedUser={selectedUser}
-              currentUserId={currentUser.id}   // ✅ Prisma ID
-              messages={messages}
-              setMessages={setMessages}
-            />
-          </div>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto">
+                <ChatContainer
+                  selectedUser={selectedUser}
+                  currentUserId={currentUser.id}
+                  messages={messages}
+                  setMessages={setMessages}
+                />
+              </div>
 
-          {/* Input */}
-          <div className="border-t w-full">
-            {selectedUser && (
-              <ChatInput
-                currentUserId={currentUser.id}   // ✅ Prisma ID
-                receiverId={selectedUser.id}     // ✅ Prisma ID
-                onMessageSent={(newMessage) =>
-                  setMessages((prev) => [...prev, newMessage])
-                }
-              />
-            )}
-          </div>
+              {/* Input */}
+              <div className="border-t border-slate-700 p-4 bg-slate-800">
+                <ChatInput
+                  currentUserId={currentUser.id}
+                  receiverId={selectedUser.id}
+                  onMessageSent={(newMessage) =>
+                    setMessages((prev) => [...prev, newMessage])
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
+              <div className="text-center p-8">
+                <div className="text-5xl mb-4">💬</div>
+                <h2 className="text-xl font-semibold mb-2">Welcome to Chat</h2>
+                <p>Select a contact to start messaging</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
+  
   );
 };
 

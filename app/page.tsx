@@ -13,14 +13,14 @@ export default async function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 py-4">
         {/* Sidebar only on home */}
         <div className="hidden lg:block lg:col-span-3">
           <Sidebar />
         </div>
 
         {/* Main content */}
-        <div className="lg:col-span-6 space-y-4">
+        <div className="lg:col-span-6 space-y-7 py-5">
           {user && <CreatePost />}
           <div className="space-y-3">
             {posts.map((post) => (

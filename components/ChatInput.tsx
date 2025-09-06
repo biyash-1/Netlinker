@@ -23,6 +23,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [sending, setSending] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
+
+
   const handleSend = async () => {
     if (!receiverId || (!message.trim() && !imageUrl)) return;
 
@@ -57,10 +59,26 @@ const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="w-full border-t p-2 flex flex-col gap-2">
+   <div className="w-full border-t p-2 flex flex-col gap-2">
+  {/* Upload + Preview row */}
+  {(showUpload || imageUrl) && (
+    <div className="flex items-center gap-3">
+      {/* UploadThing Dropzone */}
+      {showUpload && (
+        <UploadDropzone
+          className="w-32 h-[200px] border-dashed rounded-md flex items-center justify-center"
+          endpoint="postImage"
+          onClientUploadComplete={(res) => {
+            console.log("Upload result:", res);
+            if (res?.[0]?.url) setImageUrl(res[0].url);
+          }}
+          onUploadError={(err) => console.error("Upload error:", err)}
+        />
+      )}
+
       {/* Image preview */}
       {imageUrl && (
-        <div className="relative w-32 h-32 mb-2">
+        <div className="relative w-32 h-[120px]">
           <img
             src={imageUrl}
             alt="preview"
@@ -68,64 +86,55 @@ const ChatInput: React.FC<ChatInputProps> = ({
           />
           <button
             type="button"
-            className="absolute top-0 right-0 p-1 bg-red-500 rounded-full text-white"
+            className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white"
             onClick={() => setImageUrl(null)}
           >
             ✕
           </button>
         </div>
       )}
-
-      {/* UploadThing Dropzone */}
-    {showUpload && (
-  <UploadDropzone
-    className="w-32 h-[200px] border-dashed rounded-md flex items-center justify-center"
-    endpoint="postImage"
-    onClientUploadComplete={(res) => {
-      console.log("Upload result:", res);
-      if (res?.[0]?.url) setImageUrl(res[0].url);
-    }}
-    onUploadError={(err) => console.error("Upload error:", err)}
-  />
-)}
-
-      <div className="flex items-center gap-2">
-        {/* Image icon */}
-        <button
-          type="button"
-          className="p-2 rounded hover:bg-gray-200"
-          onClick={() => setShowUpload((prev) => !prev)}
-          disabled={sending}
-        >
-          <ImageIcon className="w-6 h-6 text-gray-500" />
-        </button>
-
-        {/* Text input */}
-        <Input
-          placeholder="Send a message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          disabled={sending}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-
-        {/* Send button */}
-        <button
-          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-          onClick={handleSend}
-          disabled={sending || (!message.trim() && !imageUrl)}
-        >
-          {sending ? (
-            <Loader2 className="animate-spin w-5 h-5" />
-          ) : (
-            <>
-              <span>Send</span>
-              <IoIosSend className="ml-2" />
-            </>
-          )}
-        </button>
-      </div>
     </div>
+  )}
+
+  {/* Input row */}
+  <div className="flex items-center gap-2">
+    {/* Image icon */}
+    <button
+      type="button"
+      className="p-2 rounded hover:bg-gray-200"
+      onClick={() => setShowUpload((prev) => !prev)}
+      disabled={sending}
+    >
+      <ImageIcon className="w-6 h-6 text-gray-500" />
+    </button>
+
+    {/* Text input */}
+    <Input
+      placeholder="Send a message"
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      disabled={sending}
+      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+    />
+
+    {/* Send button */}
+    <button
+      className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+      onClick={handleSend}
+      disabled={sending || (!message.trim() && !imageUrl)}
+    >
+      {sending ? (
+        <Loader2 className="animate-spin w-5 h-5" />
+      ) : (
+        <>
+          <span>Send</span>
+          <IoIosSend className="ml-2" />
+        </>
+      )}
+    </button>
+  </div>
+</div>
+
   );
 };
 

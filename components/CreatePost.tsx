@@ -40,7 +40,7 @@ function CreatePost() {
   };
 
   return (
-    <Card className="mb-6">
+    <Card className="py-4 mt-4">
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="flex space-x-4">
