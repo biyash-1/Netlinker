@@ -71,12 +71,12 @@ export async function createPostforUser(content: string, image: string) {
             },
           },
         },
-      });                             // ← close findMany(...) here
+      });                            
   
       return posts;
     } catch (error) {
       console.error("Error fetching posts:", error);
-      return [];                     // always return same shape
+      return [];                 
     }
   }
 

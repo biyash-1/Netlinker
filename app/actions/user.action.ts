@@ -1,6 +1,6 @@
 "use server"
 import { auth, currentUser } from "@clerk/nextjs/server";
-import {prisma} from "../../lib/prisma"; // Adjust the import path as needed
+import {prisma} from "../../lib/prisma"; 
 import { revalidatePath } from "next/cache";
 export async function syncUser() {
   try {
@@ -10,10 +10,10 @@ export async function syncUser() {
     console.log("user is",user);
     
 
-    // If the user is not logged in or user details are unavailable, exit the function
+    
     if (!userId || !user) return;
 
-    // Check if the user already exists in your database
+    
     const existingUser = await prisma.user.findUnique({
       where: {
         clerkId: userId,
@@ -29,7 +29,7 @@ export async function syncUser() {
       return existingUser;
     }
 
-    // Create a new user entry in the database
+   
     const dbUser = await prisma.user.create({
       data: {
         clerkId: userId,
@@ -165,7 +165,7 @@ export async function getChatContact() {
     return [];
   }
 }
-// Add to your server actions
+
 export async function getCurrentUserFollowingIds() {
   const userId = await getDbUserId();
   if (!userId) return [];
