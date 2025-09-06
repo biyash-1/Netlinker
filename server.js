@@ -1,4 +1,4 @@
-// server.js
+
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 
@@ -7,8 +7,7 @@ const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
 
-// ✅ Store multiple sockets per user
-const onlineUsers = {}; // userId -> [socketId1, socketId2, ...]
+const onlineUsers = {}; 
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
@@ -23,14 +22,14 @@ io.on("connection", (socket) => {
     console.log("User joined:", userId, "Sockets:", onlineUsers[userId]);
   });
 
-  // Receive message
+ 
   socket.on("message", (message) => {
     console.log("📩 Received:", message);
 
     const receiverSockets = onlineUsers[message.receiverId] || [];
     receiverSockets.forEach((sid) => io.to(sid).emit("message", message));
 
-    // Optional: echo back to sender
+ 
     socket.emit("message", message);
   });
 
