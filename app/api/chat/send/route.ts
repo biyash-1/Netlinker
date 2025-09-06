@@ -1,4 +1,4 @@
-// app/api/chat/send/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { sendMessage,getMessages, deleteMessage } from "@/app/actions/chat.action";
 
@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const { receiverId, content, image } = await req.json();
     console.log("Received message data:", { receiverId, content, image });
 
-    // Validate input: either content or image must exist
+    
     if (!receiverId || (!content && !image)) {
       return NextResponse.json(
         { error: "Receiver ID and content or image are required" },
