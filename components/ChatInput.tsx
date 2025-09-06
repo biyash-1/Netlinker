@@ -108,7 +108,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       <ImageIcon className="w-6 h-6 text-gray-500" />
     </button>
 
-    {/* Text input */}
+    
     <Input
       placeholder="Send a message"
       value={message}
@@ -117,7 +117,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       onKeyDown={(e) => e.key === "Enter" && handleSend()}
     />
 
-    {/* Send button */}
+    
     <button
       className="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
       onClick={handleSend}
