@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import { sendMessage,getMessages, deleteMessage } from "@/app/actions/chat.action";
+import { sendMessage,getMessages, deleteMessage, editMessage } from "@/app/actions/chat.action";
 
 export async function POST(req: NextRequest) {
   try {
@@ -81,6 +81,37 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json(result);
   } catch (err) {
     console.error("Error in delete message API:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+
+export async function PUT(req: NextRequest) {
+  try {
+    const { messageId, content } = await req.json();
+
+    if (!messageId || !content) {
+      return NextResponse.json(
+        { error: "messageId and content are required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await editMessage(messageId, content);
+
+    if (!result) {
+      return NextResponse.json(
+        { error: "Failed to edit message" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Error in edit message API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

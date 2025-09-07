@@ -2,7 +2,7 @@
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
-let joinedUsers = new Set<string>(); // track which users have joined
+const joinedUsers = new Set<string>();
 
 export const getSocket = (currentUserId: string): Socket => {
   if (!currentUserId) {

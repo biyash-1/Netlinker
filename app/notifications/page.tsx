@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { getNotifications, markNotificationsAsRead } from "@/app/actions/notification.action";
 import { NotificationsSkeleton } from "@/components/NotificationSkeleton";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -99,7 +99,7 @@ function NotificationsPage() {
                           <div className="text-sm text-muted-foreground rounded-md p-2 bg-muted/30 mt-2">
                             <p>{notification.post.content}</p>
                             {notification.post.image && (
-                              <img
+                              <Image
                                 src={notification.post.image}
                                 alt="Post content"
                                 className="mt-2 rounded-md w-full max-w-[200px] h-auto object-cover"

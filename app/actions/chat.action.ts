@@ -161,12 +161,39 @@ export async function deleteMessage(messageId: string) {
 }
 
 
-export async function editMessage() {
-  try{
-   
-  }
+export async function editMessage(messageId: string, content: string) {
+  try {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) return null;
 
-  catch(error) {
-    
+    const currentUser = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+    if (!currentUser) return null;
+
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+    });
+
+   
+    if (!message || message.senderId !== currentUser.id) {
+      throw new Error("Not authorized to edit this message");
+    }
+
+    const updatedMessage = await prisma.message.update({
+      where: { id: messageId },
+      data: { content },
+    });
+
+    revalidatePath("/chat");
+
+    return {
+      success: true,
+      message: "Message updated successfully",
+      updatedMessage,
+    }
+  } catch (error) {
+    console.error("Error editing message:", error);
+    return null;
   }
 }

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import { ChatUser } from "@/app/types/chat";
 import { useUser } from "@clerk/nextjs";
@@ -11,9 +10,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import toast from "react-hot-toast";
 
 interface ChatMessage {
-  index :Number
   id: string;
   content: string;
   senderId: string;
@@ -43,7 +42,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   const shouldAutoScroll = useRef(true);
   const [loading, setLoading] = useState(true);
 
-  // Fetch messages when selected user changes
+ 
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+
+  // Fetch messages when user selected
   useEffect(() => {
     if (!selectedUser) return;
 
@@ -68,46 +71,51 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     fetchMessages();
   }, [selectedUser, setMessages]);
 
-  // Listen for socket messages
   useEffect(() => {
-    if (!currentUserId || !selectedUser) return;
+  // Do nothing if no user is selected or currentUserId is missing
+  if (!currentUserId || !selectedUser) return;
 
-    const socket = getSocket(currentUserId);
+  const socket = getSocket(currentUserId);
 
-    const handleReceive = (message: ChatMessage) => {
-      if (
-        (message.senderId === currentUserId || message.receiverId === currentUserId) &&
-        (message.senderId === selectedUser?.id || message.receiverId === selectedUser?.id)
-      ) {
-        const withFlag = {
-          ...message,
-          isSender: message.senderId === currentUserId,
-        };
+  const handleReceive = (message: ChatMessage) => {
+    // Only handle messages relevant to the current chat
+    const isRelevant =
+      (message.senderId === currentUserId || message.receiverId === currentUserId) &&
+      (message.senderId === selectedUser.id || message.receiverId === selectedUser.id);
 
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === message.id)) return prev;
+    if (!isRelevant) return;
 
-          const container = containerRef.current;
-          if (container) {
-            const isAtBottom =
-              container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-            shouldAutoScroll.current = isAtBottom;
-          }
+    const withFlag = {
+      ...message,
+      isSender: message.senderId === currentUserId,
+    };
 
-          return [...prev, withFlag];
-        });
+    setMessages((prev) => {
+      // Avoid duplicate messages
+      if (prev.some((m) => m.id === message.id)) return prev;
+
+      const container = containerRef.current;
+      if (container) {
+        const isAtBottom =
+          container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+        shouldAutoScroll.current = isAtBottom;
       }
-    };
 
-    socket.on("message", handleReceive);
-    return () => {
-      socket.off("message", handleReceive);
-    };
-  }, [currentUserId, selectedUser?.id]);
+      return [...prev, withFlag];
+    });
+  };
+
+  socket.on("message", handleReceive);
+
+  return () => {
+    socket.off("message", handleReceive);
+  };
+}, [currentUserId, selectedUser, setMessages]);
+
 
   // Auto scroll
   useEffect(() => {
-    if (bottomRef.current) {
+    if (bottomRef.current && shouldAutoScroll.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
@@ -121,27 +129,55 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     }
   };
 
+  // Edit handlers
   const handleEdit = (msg: ChatMessage) => {
-    console.log("Editing message:", msg);
-    // Open edit modal/input here
+    setEditingMessageId(msg.id);
+    setEditContent(msg.content);
   };
 
-const handleDelete = async (index: number) => {
-  const messageId = messages[index].id;
+  const handleSaveEdit = async () => {
+    if (!editingMessageId) return;
 
-  try {
-    await fetch("/api/chat/send", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messageId }),
-    });
+    try {
+     const res =  await fetch("/api/chat/send", {
+        method: "PUT", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId: editingMessageId, content: editContent }),
+      });
 
-    // update UI
-    setMessages((prev) => prev.filter((_, i) => i !== index));
-  } catch (err) {
-    console.error("Failed to delete message:", err);
-  }
-};
+      const data = await res.json();
+      console.log("from bacekned",data)
+
+      // Update local state
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === editingMessageId ? { ...m, content: editContent } : m
+        )
+      );
+      toast.success("Message edited successfully");
+
+      setEditingMessageId(null);
+      setEditContent("");
+    } catch (err) {
+      console.error("Failed to edit message:", err);
+    }
+  };
+
+  const handleDelete = async (index: number) => {
+    const messageId = messages[index].id;
+
+    try {
+      await fetch("/api/chat/send", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId }),
+      });
+
+      setMessages((prev) => prev.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Failed to delete message:", err);
+    }
+  };
 
   if (!selectedUser) {
     return (
@@ -182,8 +218,10 @@ const handleDelete = async (index: number) => {
                 </div>
               </div>
             ))
-          : messages.map((msg,index) => {
+          : messages.map((msg, index) => {
               const isSender = msg.senderId === currentUserId;
+              const isEditing = editingMessageId === msg.id;
+
               return (
                 <div
                   key={msg.id}
@@ -195,25 +233,23 @@ const handleDelete = async (index: number) => {
                     } items-end gap-2 relative`}
                   >
                     {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src={
-                          isSender
-                            ? currentUserAvatar || "/avatar.png"
-                            : selectedUser?.image || "/avatar.png"
-                        }
-                        alt="avatar"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    </div>
+                    <img
+                      src={
+                        isSender
+                          ? currentUserAvatar || "/avatar.png"
+                          : selectedUser?.image || "/avatar.png"
+                      }
+                      alt="avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
 
-                    {/* Message bubble + edit icon */}
+                    {/* Message container */}
                     <div
                       className={`relative flex flex-col ${
                         isSender ? "items-end" : "items-start"
                       }`}
                     >
-                      {/* Sender name + time */}
+                      {/* Name + Time */}
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-medium text-slate-300">
                           {isSender ? "You" : selectedUser?.name}
@@ -226,49 +262,73 @@ const handleDelete = async (index: number) => {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        {/* Edit icon (only for sender, appears on hover) */}
-                        {isSender && (
-                          <div className="opacity-0 group-hover:opacity-100 transition">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button className="p-1 rounded-full hover:bg-slate-700 flex items-center justify-center">
-                                  <AiOutlineEdit size={18} className="text-gray-400" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent className="w-28 bg-slate-800 text-slate-200 border border-slate-700">
-                                <DropdownMenuItem onClick={() => handleEdit(msg)}>
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-red-400"
-                                  onClick={() => handleDelete(index)}
-                                >
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        )}
-
-                        {/* Message content */}
-                        <div
-                          className={`rounded-2xl px-4 py-2 ${
-                            isSender
-                              ? "bg-blue-600 text-white"
-                              : "bg-slate-700 text-slate-200"
-                          }`}
-                        >
-                          {msg.content}
-                          {msg.image && (
-                            <img
-                              src={msg.image}
-                              alt="image"
-                              className="w-[200px] h-auto object-cover mt-2 rounded-lg"
-                            />
-                          )}
+                      {/* Editing vs Normal */}
+                      {isEditing ? (
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="px-2 py-1 rounded bg-slate-700 text-slate-200 outline-none"
+                          />
+                          <button
+                            onClick={handleSaveEdit}
+                            className="px-2 py-1 bg-green-500 text-white rounded"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingMessageId(null)}
+                            className="px-2 py-1 bg-gray-500 text-white rounded"
+                          >
+                            Cancel
+                          </button>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {/* Dropdown for sender */}
+                          {isSender && (
+                            <div className="opacity-0 group-hover:opacity-100 transition">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="p-1 rounded-full hover:bg-slate-700 flex items-center justify-center">
+                                    <AiOutlineEdit size={18} className="text-gray-400" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-28 bg-slate-800 text-slate-200 border border-slate-700">
+                                  <DropdownMenuItem onClick={() => handleEdit(msg)}>
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-400"
+                                    onClick={() => handleDelete(index)}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          )}
+
+                          {/* Normal message */}
+                          <div
+                            className={`rounded-2xl px-4 py-2 ${
+                              isSender
+                                ? "bg-blue-600 text-white"
+                                : "bg-slate-700 text-slate-200"
+                            }`}
+                          >
+                            {msg.content}
+                            {msg.image && (
+                              <img
+                                src={msg.image}
+                                alt="image"
+                                className="w-[200px] h-auto object-cover mt-2 rounded-lg"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
