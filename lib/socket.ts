@@ -1,4 +1,4 @@
-// app/lib/socket.ts
+
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket | null = null;
@@ -10,7 +10,7 @@ export const getSocket = (currentUserId: string): Socket => {
   }
 
   if (!socket) {
-    socket = io("http://localhost:4000", { transports: ["websocket"] });
+    socket = io("https://socket-back-1-m6ib.onrender.com/", { transports: ["websocket"] });
 
     socket.on("connect", () => {
       console.log("✅ Connected to server:", socket?.id);

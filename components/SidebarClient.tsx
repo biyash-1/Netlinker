@@ -45,7 +45,7 @@ function RelationModal<T>({
   currentFollowingIds: string[];
 }) {
   return (
-    <div className="absolute top-0 right-0 mt-2 mr-2 w-96 h-96 bg-white dark:bg-gray-900 z-10 rounded-lg shadow-lg overflow-auto">
+    <div className="absolute top-0 right-1 mt-2 mr-2 w-96 h-96 bg-slate-900  z-10 rounded-lg shadow-lg overflow-auto">
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-lg font-bold">{title}</h2>
         <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">

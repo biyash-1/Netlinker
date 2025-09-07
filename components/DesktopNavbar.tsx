@@ -1,6 +1,6 @@
 "use client";
 
-import { BellIcon, HomeIcon, UserIcon } from "lucide-react";
+import { BellIcon, HomeIcon, UserIcon,MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { ModeToggle } from "./ModeToggle";
@@ -24,7 +24,7 @@ function DesktopNavbar() {
         <>
           {/* Chat */}
           <Link href="/chats" className={navItemClass}>
-            <BellIcon className="w-4 h-4" />
+            <MessageCircle className="w-4 h-4" />
             <span className="hidden lg:inline">Chat</span>
           </Link>
 

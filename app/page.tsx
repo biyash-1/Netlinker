@@ -30,7 +30,7 @@ export default async function Home() {
         </div>
 
         {/* Who to follow widget */}
-        <div className="hidden lg:block lg:col-span-3 sticky top-20">
+        <div className="hidden lg:block lg:col-span-3 py-5 ">
           <WhoToFollow />
         </div>
       </div>
