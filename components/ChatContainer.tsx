@@ -42,7 +42,6 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
   const shouldAutoScroll = useRef(true);
   const [loading, setLoading] = useState(true);
 
- 
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
 
@@ -58,6 +57,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         if (res.ok) {
           setMessages(data);
           shouldAutoScroll.current = true;
+
+          // 👇 force scroll after first load
+          setTimeout(() => {
+            bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+          }, 50);
         } else {
           console.error("Failed to fetch messages:", data);
         }
@@ -71,53 +75,51 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     fetchMessages();
   }, [selectedUser, setMessages]);
 
+  // Socket listener for new messages
   useEffect(() => {
-  // Do nothing if no user is selected or currentUserId is missing
-  if (!currentUserId || !selectedUser) return;
+    if (!currentUserId || !selectedUser) return;
 
-  const socket = getSocket(currentUserId);
+    const socket = getSocket(currentUserId);
 
-  const handleReceive = (message: ChatMessage) => {
-    // Only handle messages relevant to the current chat
-    const isRelevant =
-      (message.senderId === currentUserId || message.receiverId === currentUserId) &&
-      (message.senderId === selectedUser.id || message.receiverId === selectedUser.id);
+    const handleReceive = (message: ChatMessage) => {
+      const isRelevant =
+        (message.senderId === currentUserId || message.receiverId === currentUserId) &&
+        (message.senderId === selectedUser.id || message.receiverId === selectedUser.id);
 
-    if (!isRelevant) return;
+      if (!isRelevant) return;
 
-    const withFlag = {
-      ...message,
-      isSender: message.senderId === currentUserId,
+      const withFlag = {
+        ...message,
+        isSender: message.senderId === currentUserId,
+      };
+
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, withFlag];
+      });
+
+      // always scroll on new message
+      shouldAutoScroll.current = true;
     };
 
-    setMessages((prev) => {
-      // Avoid duplicate messages
-      if (prev.some((m) => m.id === message.id)) return prev;
+    socket.on("message", handleReceive);
 
-      const container = containerRef.current;
-      if (container) {
-        const isAtBottom =
-          container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-        shouldAutoScroll.current = isAtBottom;
-      }
+    return () => {
+      socket.off("message", handleReceive);
+    };
+  }, [currentUserId, selectedUser, setMessages]);
 
-      return [...prev, withFlag];
-    });
-  };
-
-  socket.on("message", handleReceive);
-
-  return () => {
-    socket.off("message", handleReceive);
-  };
-}, [currentUserId, selectedUser, setMessages]);
-
-
-  // Auto scroll
+  // Auto scroll whenever messages update
   useEffect(() => {
-    if (bottomRef.current && shouldAutoScroll.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
+    if (!bottomRef.current) return;
+
+    const timeout = setTimeout(() => {
+      if (shouldAutoScroll.current) {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
+    }, 50);
+
+    return () => clearTimeout(timeout);
   }, [messages]);
 
   const handleScroll = () => {
@@ -139,16 +141,15 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
     if (!editingMessageId) return;
 
     try {
-     const res =  await fetch("/api/chat/send", {
-        method: "PUT", 
+      const res = await fetch("/api/chat/send", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messageId: editingMessageId, content: editContent }),
       });
 
       const data = await res.json();
-      console.log("from bacekned",data)
+      console.log("from backend", data);
 
-      // Update local state
       setMessages((prev) =>
         prev.map((m) =>
           m.id === editingMessageId ? { ...m, content: editContent } : m
@@ -310,7 +311,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                             </div>
                           )}
 
-                          {/* Normal message */}
+                          
                           <div
                             className={`rounded-2xl px-4 py-2 ${
                               isSender
