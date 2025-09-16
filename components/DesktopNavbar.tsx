@@ -4,7 +4,7 @@ import { BellIcon, HomeIcon, UserIcon,MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { ModeToggle } from "./ModeToggle";
-import { leaveSocket } from "@/lib/socket";
+
 
 function DesktopNavbar() {
   const { user, isSignedIn } = useUser();
