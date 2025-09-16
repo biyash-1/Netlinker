@@ -48,30 +48,34 @@ const ChatSidebar = ({ selectedUser, setSelectedUser, currentUserId }: ChatSideb
   }, []);
 
   // 2️⃣ Subscribe to messages and update unread counts
-  useEffect(() => {
-    if (!currentUserId) return;
+ // 2️⃣ Subscribe to messages and update unread counts
+useEffect(() => {
+  if (!currentUserId) return;
 
-    const socket = getSocket(currentUserId);
-    console.log("⚡ Socket connected:", socket.id);
+  const socket = getSocket(currentUserId);
+  console.log("⚡ Socket connected:", socket.id);
 
-    const unsubscribe = subscribeMessages((message: any) => {
-      const { senderId, receiverId } = message;
+  const unsubscribe = subscribeMessages((message: any) => {
+    const { senderId, receiverId } = message;
 
-      // Only increment unread if the message is to current user
-      if (receiverId === currentUserId) {
-        setUnreadCounts((prev) => {
-          const newCount = (prev[senderId] || 0) + 1;
-          console.log("🔔 Incremented unread for", senderId, "New unreadCounts:", {
-            ...prev,
-            [senderId]: newCount,
-          });
-          return { ...prev, [senderId]: newCount };
+    // ✅ Only increment unread if:
+    // 1. The message is for me (receiverId === currentUserId)
+    // 2. AND the sender is NOT the currently selected user
+    if (receiverId === currentUserId && senderId !== selectedUser?.id) {
+      setUnreadCounts((prev) => {
+        const newCount = (prev[senderId] || 0) + 1;
+        console.log("🔔 Incremented unread for", senderId, "New unreadCounts:", {
+          ...prev,
+          [senderId]: newCount,
         });
-      }
-    });
+        return { ...prev, [senderId]: newCount };
+      });
+    }
+  });
 
-    return () => unsubscribe?.();
-  }, [currentUserId]);
+  return () => unsubscribe?.();
+}, [currentUserId, selectedUser]); // <-- add selectedUser dependency
+
 
   // 3️⃣ Handle selecting a user: reset their unread count
   const handleSelectUser = (user: ChatUser) => {
