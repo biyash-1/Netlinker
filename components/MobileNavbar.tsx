@@ -1,4 +1,5 @@
 "use client";
+
 import {
   BellIcon,
   HomeIcon,
@@ -7,23 +8,30 @@ import {
   MoonIcon,
   SunIcon,
   UserIcon,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useState } from "react";
-import {useUser, useAuth, SignInButton, SignOutButton } from "@clerk/nextjs";
+import { useUser, useAuth, SignInButton, SignOutButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
-
- function MobileNavbar() {
+function MobileNavbar() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { isSignedIn } = useAuth();
   const { theme, setTheme } = useTheme();
- const {user} = useUser();
+  const { user } = useUser();
 
   return (
     <div className="flex md:hidden items-center space-x-2">
+      {/* Theme toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -35,6 +43,7 @@ import Link from "next/link";
         <span className="sr-only">Toggle theme</span>
       </Button>
 
+      {/* Mobile menu */}
       <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -45,8 +54,14 @@ import Link from "next/link";
           <SheetHeader>
             <SheetTitle>Menu</SheetTitle>
           </SheetHeader>
+
           <nav className="flex flex-col space-y-4 mt-6">
-            <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
+            {/* Home */}
+            <Button
+              variant="ghost"
+              className="flex items-center gap-3 justify-start"
+              asChild
+            >
               <Link href="/">
                 <HomeIcon className="w-4 h-4" />
                 Home
@@ -55,22 +70,53 @@ import Link from "next/link";
 
             {isSignedIn ? (
               <>
-                <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
+                {/* Notifications */}
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start"
+                  asChild
+                >
                   <Link href="/notifications">
                     <BellIcon className="w-4 h-4" />
                     Notifications
                   </Link>
                 </Button>
-                <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
-                  <Link href={`/profile/${
-                user?.username ?? user?.emailAddresses[0].emailAddress.split("@")[0]
-              }`}>
+
+                {/* Chat */}
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start"
+                  asChild
+                >
+                  <Link href="/chats">
+                    <MessageCircle className="w-4 h-4" />
+                    Chat
+                  </Link>
+                </Button>
+
+                {/* Profile */}
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start"
+                  asChild
+                >
+                  <Link
+                    href={`/profile/${
+                      user?.username ??
+                      user?.emailAddresses[0].emailAddress.split("@")[0]
+                    }`}
+                  >
                     <UserIcon className="w-4 h-4" />
                     Profile
                   </Link>
                 </Button>
+
+                {/* Logout */}
                 <SignOutButton>
-                  <Button variant="ghost" className="flex items-center gap-3 justify-start w-full">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-3 justify-start w-full"
+                  >
                     <LogOutIcon className="w-4 h-4" />
                     Logout
                   </Button>
