@@ -57,6 +57,7 @@ const Page = () => {
           <ChatSidebar
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
+              currentUserId={currentUser.id}
           />
         </div>
 

@@ -5,7 +5,7 @@ let socket: Socket | null = null;
 let onlineUserIds = new Set<string>();
 const joinedUsers = new Set<string>();
 
-const SOCKET_URL = "http://localhost:4000";
+const SOCKET_URL = "https://socket-back-1-m6ib.onrender.com/";
 
 // Connect socket and join current user
 export const getSocket = (currentUserId: string): Socket => {
@@ -72,12 +72,13 @@ export const subscribeOnlineUsers = (callback: (ids: string[]) => void) => {
 
 // New helper: subscribe to messages (centralized)
 export const subscribeMessages = (callback: (message: any) => void) => {
-  if (!socket) return;
+  if (!socket) return () => {}; // return empty function instead of undefined
+
   const handler = (message: any) => callback(message);
   socket.on("message", handler);
+
   return () => socket?.off("message", handler);
 };
-
 
 
 // Check if a user is online

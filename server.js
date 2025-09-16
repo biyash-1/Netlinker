@@ -13,6 +13,7 @@ const io = new Server(httpServer, {
 // Store online users: userId -> [socketId, ...]
 const onlineUsers = {};
 
+
 // Broadcast current online users to all clients
 function broadcastOnlineUsers() {
   const ids = Object.keys(onlineUsers); // userIds
